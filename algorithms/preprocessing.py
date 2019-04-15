@@ -62,7 +62,7 @@ def preprocess(dta_option1):
         le.fit(list(flatten))
         for line in range(len(rows)):
             rows[line] = le.transform(rows[line])
-        a = input('Falta acabar preprocess')
+        a = input('Falta acabar preprocess: continues att and labels between 1 and Nclasses')
 
 
 
@@ -89,7 +89,7 @@ def preprocess(dta_option1):
         flatten = set(labels)
         le.fit(list(flatten))
         labels = le.transform(labels)
-        a = input('Falta acabar preprocess')
+        a = input('Falta acabar preprocess: continues att and labels between 1 and Nclasses')
 
     elif (dta_option1==5):
         for line in file:
@@ -105,7 +105,7 @@ def preprocess(dta_option1):
         flatten = set(labels)
         le.fit(list(flatten))
         labels = le.transform(labels)
-        a = input('Falta acabar preprocess')
+        a = input('Falta acabar preprocess: continues att and labels between 1 and Nclasses')
 
     return rows, labels
 
