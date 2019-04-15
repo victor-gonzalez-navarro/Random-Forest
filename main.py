@@ -7,10 +7,11 @@ from algorithms.randomForestAlgorithm import randomForestAlgorithm
 # ----------------------------------------------------------------------------------------------------------------- Main
 def main():
     # HYPERPARAMETERS **********************************
-    dta_option1 = 1  # Number of the Dataset
-    perc_test = 0.3  # Fraction of Test set
+    dta_option1 = 0  # Number of the Dataset
+    print('Change fraction train test')
+    perc_test = 0  # Fraction of Test set
     NT = 5  # Number of trees
-    F = 2  # Number of features
+    F = 3  # Number of features
     # **************************************************
 
     print('\033[1m' + 'The number of the dataset selected is: ' + str(dta_option1) + '\033[0m')
@@ -46,11 +47,6 @@ def main():
     # Compute Accuracy between ground truth and predicted labels
     test_accuracy = (sum([a == b for a,b in zip(labels_test, randForest.tst_labels)]))/len(labels_test)
     print('\033[1m' + 'The final test accuracy is: ' + str(round(test_accuracy, 3)) + '\033[0m')
-
-#    # Find rules of the whole model using train and test set
-#    print('\n********************************************** Rules induced with the full set (Train + Test)')
-#    rise_final = riseAlgorithm(numericalatt)
-#    rise_final.fit(data, labels)
 
 
 # ----------------------------------------------------------------------------------------------------------------- Init

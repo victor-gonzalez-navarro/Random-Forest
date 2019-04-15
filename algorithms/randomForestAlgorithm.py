@@ -10,7 +10,7 @@ class randomForestAlgorithm():
 
     def __init__(self, NT, F):
         self.NT = NT
-        self.NT = F
+        self.F = F
 
     def fit(self, data, labels):
         Ninstances = data.shape[0]

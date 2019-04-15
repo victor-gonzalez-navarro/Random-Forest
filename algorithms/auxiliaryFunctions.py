@@ -14,36 +14,41 @@ def compute_used_features(string):
             feat = ''
     return features
 
+
 def compute_information(data, labels):
     dat = dict()
-    N_classes = len(set(labels))
     N_instances = len(labels)
-
-    classes_vector = [0.0] * N_classes
     for it in range(N_instances):
+        dicti = dict()
         item = data[it]
         if item not in dat:
-            new_class_vector = np.copy(classes_vector)
-            new_class_vector[labels[it]-1] = new_class_vector[labels[it]-1] + 1.0
-            dat[item] = [1.0, new_class_vector]
+            dicti[labels[it]] = 1
+            dat[item] = dicti
         else:
-            dat[item][0] = dat[item][0] + 1.0
-            dat[item][1][labels[it]-1] = dat[item][1][labels[it]-1] + 1.0
-
+            if labels[it] in dat[item]:
+                dat[item][labels[it]] = dat[item][labels[it]] + 1
+            else:
+                last_dict = dict(dat[item])
+                last_dict[labels[it]] = 1
+                dat[item] = dict()
+                dat[item] = last_dict
     information = 0
-    for item in dat.keys():
+    for item in set(data):
+        num_firstPart = sum(data==item)
+        first_part = num_firstPart/len(data)
         logpart = 0
-        dat[item][1] = np.divide(dat[item][1], sum(dat[item][1]))
-        for coef in dat[item][1]:
-            if coef != 0:
-                logpart = logpart + (-coef) * (math.log2(coef))
-
-        information = information + (dat[item][0] / float(N_instances)) * logpart
+        for dictkeys in dat[item].keys():
+            vall = dat[item][dictkeys]
+            if vall != 0:
+                coef = vall/num_firstPart
+                logpart = logpart + (-coef)*math.log2(coef)
+        information = information + first_part*logpart
     return information
+
 
 def number_differentvalues_att(last_add, data):
     string = last_add[0]
-    it = len(string)-1
+    it = len(string)-2
     feature = ''
     while string[it] != '[':
         feature = string[it] + feature
@@ -51,15 +56,32 @@ def number_differentvalues_att(last_add, data):
     result = list(set(data[last_add[1],int(feature)]))
     return result, int(feature)
 
-def instances_satisfying_attvalue(data, att_values, inst):
+
+def instances_satisfying_attvalue(data, inst):
     result = dict()
     for i in range(len(data)):
         keyy = data[i]
         if keyy in result:
-            result[keyy] = result[keyy].append(inst[i])
+            result[keyy] = result[keyy] + [inst[i],]
         else:
             result[keyy] = [inst[i]]
     return result
+
+
+def is_terminal(string, data, labels):
+    isterminal = False
+    label = None
+    # All instances belong to the same class?
+    if len(set(labels))==1:
+        isterminal = True
+        label = labels[0]
+    # There are no more attribute lefts to use
+    elif len(compute_used_features(string)) == data.shape[1]:
+        isterminal = True
+        # The label assigned is the majority of the instances in the leaf
+        label = labels
+    return isterminal, label
+
 
 
 

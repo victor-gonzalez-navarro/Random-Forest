@@ -7,6 +7,9 @@ from collections import Counter
 
 def preprocess(dta_option1):
 
+    if dta_option1 == 0:
+        # Contact Lenses dataset
+        file = open('./datasets/slides.csv', 'r')
     if dta_option1 == 1:
         # Contact Lenses dataset
         file = open('./datasets/lenses.data.csv', 'r')
@@ -25,7 +28,14 @@ def preprocess(dta_option1):
 
     rows = []
     labels = []
-    if (dta_option1==1):
+
+    if (dta_option1==0):
+        for line in file:
+            row = line.split()
+            rows.append(row[1:-1])
+            labels.append(row[-1:])
+
+    elif (dta_option1==1):
         for line in file:
             row = line.split()
             rows.append(row[1:-1])
@@ -62,7 +72,7 @@ def preprocess(dta_option1):
         le.fit(list(flatten))
         for line in range(len(rows)):
             rows[line] = le.transform(rows[line])
-        a = input('Falta acabar preprocess: continues att and labels between 1 and Nclasses')
+        a = input('Falta acabar preprocess: continues att')
 
 
 
@@ -89,7 +99,7 @@ def preprocess(dta_option1):
         flatten = set(labels)
         le.fit(list(flatten))
         labels = le.transform(labels)
-        a = input('Falta acabar preprocess: continues att and labels between 1 and Nclasses')
+        a = input('Falta acabar preprocess: continues att')
 
     elif (dta_option1==5):
         for line in file:
@@ -105,7 +115,7 @@ def preprocess(dta_option1):
         flatten = set(labels)
         le.fit(list(flatten))
         labels = le.transform(labels)
-        a = input('Falta acabar preprocess: continues att and labels between 1 and Nclasses')
+        a = input('Falta acabar preprocess: continues att')
 
     return rows, labels
 
