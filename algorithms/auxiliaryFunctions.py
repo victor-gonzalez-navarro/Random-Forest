@@ -14,6 +14,12 @@ def compute_used_features(string):
             feat = ''
     return features
 
+def generate_string(vector):
+    string = ''
+    for itt in vector:
+        string = string + '[' + str(itt) + ']'
+    return string
+
 
 def compute_information(data, labels):
     dat = dict()
@@ -97,14 +103,18 @@ def draw_tree(tree):
                     label = phrase[it] + label
                     it = it - 1
                 path = compute_used_features(item)
-                file.write('\n "At: '+str(path[-2])+ '" -> ' +'"At: '+str(path[-1]) + '" [label='+label+']')
+                string_new = generate_string(path[:-1])
+                file.write('\n "At: '+str(path[-2])+ "\\n"+'#inst. = '+str(len(tree[string_new][1]))+'" -> ' +'"At: '+str(path[-1]) + "\\n"+'#inst. = '+str(len(tree[item][1]))+'" [label='+label+']')
             else:
                 finito = finito + 1
                 it = len(item) - 1
+                # Compute Attribute value
                 label = ''
                 while item[it] != '*':
                     label = item[it] + label
                     it = it - 1
+
+                # Compute class label
                 while item[it] != '-':
                     it = it - 1
                 it = it - 2
@@ -112,6 +122,8 @@ def draw_tree(tree):
                 while item[it] != ':':
                     class_label = item[it] + class_label
                     it = it - 1
+
+                # Compute last feature
                 while item[it] != ']':
                     it = it - 1
                 letter = ''
@@ -120,8 +132,20 @@ def draw_tree(tree):
                     it = it - 1
                 letter = '[' + letter
                 path = compute_used_features(letter)
-                file.write('\n "At: '+str(path[0])+ '" -> ' +'"T'+str(finito)+': Class '+ str(
-                    class_label) + '" [label='+label+']')
+
+                # Compute all chain of fetures
+                new_pint = 0
+                ppath = ''
+                while item[new_pint] != '-':
+                    ppath = ppath + item[new_pint]
+                    new_pint = new_pint + 1
+                ppath = compute_used_features(ppath)
+                string_new = generate_string(ppath)
+
+                # Print
+                file.write('\n "At: '+str(path[0])+ "\\n"+'#inst. = '+str(len(tree[string_new][1]))+'" -> ' +'"T'+str(
+                    finito)+': Class '+ str(class_label) + "\\n"+'#inst. = '+str(len(tree[item][1]))+ '" [label='+label+']')
+
         enter = True
     file.write('\n}')
     file.close()

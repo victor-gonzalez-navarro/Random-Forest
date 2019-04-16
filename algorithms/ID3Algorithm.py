@@ -132,10 +132,5 @@ class ID3Algorithm():
                             equal = False
             if len(test_labels) == i:
                 test_labels.append(0)
-            if len(test_labels) == i+2:
-                print('Problem')
-
-
-
 
         self.tst_labels = test_labels

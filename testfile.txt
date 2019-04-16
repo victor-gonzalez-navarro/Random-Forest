@@ -1,4 +1,6 @@
 digraph G {
- "At: 0" -> "T1: Class 2" [label=2.0]
- "At: 0" -> "T2: Class 2" [label=3.0]
+ "At: 0\n#inst. = 6" -> "T1: Class 1\n#inst. = 3" [label=1.0]
+ "At: 0\n#inst. = 6" -> "At: 2\n#inst. = 3" [label=3.0]
+ "At: 2\n#inst. = 3" -> "T2: Class 1\n#inst. = 1" [label=1.0]
+ "At: 2\n#inst. = 3" -> "T3: Class 2\n#inst. = 2" [label=2.0]
 }
