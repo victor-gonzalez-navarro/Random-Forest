@@ -7,6 +7,7 @@ from algorithms.auxiliaryFunctions import *
 class ID3Algorithm():
 
     tst_labels = None
+    tree = None
 
     def __init__(self, F):
         self.F = F
@@ -82,13 +83,59 @@ class ID3Algorithm():
                     else:
                         sequence = tree[last_add[0]][2]+'*'+str(att_values[i])
                         dictionary = [last_add[0]+'--Class:'+str(lab_class)+'--Seq:'+sequence, dict_inst_satis[
-                            att_values[i]],
-                                      sequence]
+                            att_values[i]], sequence]
 
                     # Add node to the tree
                     tree[dictionary[0]] = dictionary
 
             last_added = new_added
+        draw_tree(tree)
+        self.tree = tree
 
     def classify(self, data_test):
-        pass
+        test_labels = []
+        for i in range(data_test.shape[0]):
+            for item in self.tree.keys():
+                if 'Class' in item:
+                    pointer2 = 0
+                    while item[pointer2] != ':':
+                        pointer2 = pointer2 + 1
+                    pointer2 = pointer2 + 1
+                    class_l = ''
+                    while item[pointer2] != '-':
+                        class_l = class_l + str(item[pointer2])
+                        pointer2 = pointer2 + 1
+                    while item[pointer2] != '*':
+                        pointer2 = pointer2 + 1
+                    pointer2 = pointer2 + 1
+                    equal = True
+                    while equal:
+                        # Determine feature
+                        feat_num = ''
+                        pointer1 = 1
+                        while item[pointer1] != ']':
+                            feat_num = feat_num + str(item[pointer1])
+                            pointer1 = pointer1 + 1
+                        feat_num = int(float(feat_num))
+
+                        # Determine value
+                        val_num = ''
+                        while (pointer2 < (len(item))) and (item[pointer2] != '*'):
+                            val_num = val_num + str(item[pointer2])
+                            pointer2 = pointer2 + 1
+                        pointer2 = pointer2 + 1
+                        if val_num == '':
+                            equal = False
+                            test_labels.append(float(class_l))
+                        # Equality?
+                        elif data_test[i,feat_num] != float(val_num):
+                            equal = False
+            if len(test_labels) == i:
+                test_labels.append(0)
+            if len(test_labels) == i+2:
+                print('Problem')
+
+
+
+
+        self.tst_labels = test_labels

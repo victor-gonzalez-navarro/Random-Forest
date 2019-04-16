@@ -82,6 +82,50 @@ def is_terminal(string, data, labels):
         label = labels
     return isterminal, label
 
+def draw_tree(tree):
+    file = open('./testfile.txt', 'w')
+    file.write('digraph G {')
+    enter = False
+    finito = 0
+    for item in tree.keys():
+        if enter:
+            if 'Class' not in item:
+                phrase = tree[item][2]
+                it = len(phrase) - 1
+                label = ''
+                while phrase[it] != '*':
+                    label = phrase[it] + label
+                    it = it - 1
+                path = compute_used_features(item)
+                file.write('\n "At: '+str(path[-2])+ '" -> ' +'"At: '+str(path[-1]) + '" [label='+label+']')
+            else:
+                finito = finito + 1
+                it = len(item) - 1
+                label = ''
+                while item[it] != '*':
+                    label = item[it] + label
+                    it = it - 1
+                while item[it] != '-':
+                    it = it - 1
+                it = it - 2
+                class_label = ''
+                while item[it] != ':':
+                    class_label = item[it] + class_label
+                    it = it - 1
+                while item[it] != ']':
+                    it = it - 1
+                letter = ''
+                while item[it] != '[':
+                    letter = item[it] + letter
+                    it = it - 1
+                letter = '[' + letter
+                path = compute_used_features(letter)
+                file.write('\n "At: '+str(path[0])+ '" -> ' +'"T'+str(finito)+': Class '+ str(
+                    class_label) + '" [label='+label+']')
+        enter = True
+    file.write('\n}')
+    file.close()
+
 
 
 

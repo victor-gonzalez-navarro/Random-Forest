@@ -1,0 +1,4 @@
+digraph G {
+ "At: 0" -> "T1: Class 2" [label=2.0]
+ "At: 0" -> "T2: Class 2" [label=3.0]
+}

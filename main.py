@@ -9,7 +9,7 @@ def main():
     # HYPERPARAMETERS **********************************
     dta_option1 = 0  # Number of the Dataset
     print('Change fraction train test')
-    perc_test = 0  # Fraction of Test set
+    perc_test = 0.3  # Fraction of Test set
     NT = 5  # Number of trees
     F = 3  # Number of features
     # **************************************************
@@ -18,7 +18,6 @@ def main():
     print('\033[1m' + 'The number of Trees is: ' + str(NT) + '\033[0m')
     print('\033[1m' + 'The number of Features in the Forest is: ' + str(F) + '\033[0m')
 
-    print('********************************************** Rules induced with Train set')
 
     # Preprocess the data
     rows, labels = preprocess(dta_option1)
@@ -46,8 +45,8 @@ def main():
 
     # Compute Accuracy between ground truth and predicted labels
     test_accuracy = (sum([a == b for a,b in zip(labels_test, randForest.tst_labels)]))/len(labels_test)
-    print('\033[1m' + 'The final test accuracy is: ' + str(round(test_accuracy, 3)) + '\033[0m')
-
+    print('\033[1m' + '**The final test accuracy is: ' + str(round(test_accuracy, 3)) +'**'+ '\033[0m')
+    print('\nIf class is not found, the label is 0. Change this')
 
 # ----------------------------------------------------------------------------------------------------------------- Init
 if __name__ == '__main__':
