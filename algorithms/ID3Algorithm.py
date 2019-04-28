@@ -1,7 +1,7 @@
 import random
-from anytree import Node, RenderTree
 
 from algorithms.auxiliaryFunctions import *
+from collections import Counter
 
 
 class ID3Algorithm():
@@ -9,11 +9,12 @@ class ID3Algorithm():
     tst_labels = None
     tree = None
 
-    def __init__(self, F):
+    def __init__(self, F, b):
         self.F = F
+        self.b = b
 
     def fit(self, data, labels):
-        all_nodes_finished = False
+        # random.seed(15)
 
         tree = dict()  # Tree as a dictionary of dictionaries (dicitionaries is a list of used nodes and indices)
         last_added = []  # Last added nodes
@@ -37,7 +38,7 @@ class ID3Algorithm():
         best_attr = vec_random[best_indx]
         keyy = '['+str(best_attr)+']'
         dictionary = [keyy,[it for it in range(data.shape[0])],'']
-        tree[dictionary[0]] = dictionary
+        tree[dictionary[0]+dictionary[2]] = dictionary  # dictionary is a list with: the attributes seen, the instances that are included, and the value o the attributes (i.e., useful for the tree)
         last_added.append(dictionary)
 
         # REST OF THE NODES ----------------------------------------------------------------
@@ -76,61 +77,74 @@ class ID3Algorithm():
                         best_indx = information.index(min(information))
                         best_attr = vec_random[best_indx]
                         keyy = '[' + str(best_attr) + ']'
-                        dictionary = [last_add[0]+keyy, indices, tree[last_add[0]][2]+'*'+str(att_values[i])]
+                        dictionary = [last_add[0]+keyy, indices, tree[last_add[0]+last_add[2]][2]+'*'+str(att_values[i])]
 
                         # Add node to analyze
                         new_added.append(dictionary)
+                        # Add node to the tree
+                        tree[dictionary[0] + dictionary[2]] = dictionary
                     else:
-                        sequence = tree[last_add[0]][2]+'*'+str(att_values[i])
-                        dictionary = [last_add[0]+'--Class:'+str(lab_class)+'--Seq:'+sequence, dict_inst_satis[
-                            att_values[i]], sequence]
+                        sequence = tree[last_add[0]+last_add[2]][2]+'*'+str(att_values[i])
+                        if isinstance(lab_class,np.ndarray):
+                            c = Counter(lab_class)
+                            best = c.most_common(1)[0][0]
+                            str_lab_class = str(best)+' Acc. '+str(round(sum(lab_class==best)/len(lab_class),2))
+                        else:
+                            str_lab_class = str(lab_class)
 
-                    # Add node to the tree
-                    tree[dictionary[0]] = dictionary
+
+                        dictionary = [last_add[0]+'--Class:'+str_lab_class+'--Seq:'+sequence, dict_inst_satis[
+                            att_values[i]], sequence]
+                        tree[dictionary[0]] = dictionary
+
 
             last_added = new_added
-        draw_tree(tree)
+        # draw_tree(tree, self.b)
         self.tree = tree
 
-    def classify(self, data_test):
+    def classify(self, data_test, intances_used):
         test_labels = []
         for i in range(data_test.shape[0]):
-            for item in self.tree.keys():
-                if 'Class' in item:
-                    pointer2 = 0
-                    while item[pointer2] != ':':
-                        pointer2 = pointer2 + 1
-                    pointer2 = pointer2 + 1
-                    class_l = ''
-                    while item[pointer2] != '-':
-                        class_l = class_l + str(item[pointer2])
-                        pointer2 = pointer2 + 1
-                    while item[pointer2] != '*':
-                        pointer2 = pointer2 + 1
-                    pointer2 = pointer2 + 1
-                    equal = True
-                    while equal:
-                        # Determine feature
-                        feat_num = ''
-                        pointer1 = 1
-                        while item[pointer1] != ']':
-                            feat_num = feat_num + str(item[pointer1])
-                            pointer1 = pointer1 + 1
-                        feat_num = int(float(feat_num))
-
-                        # Determine value
-                        val_num = ''
-                        while (pointer2 < (len(item))) and (item[pointer2] != '*'):
-                            val_num = val_num + str(item[pointer2])
+            if (i in intances_used):
+                test_labels.append(-1)
+            else:
+                for itemm in self.tree.keys():
+                    item = self.tree[itemm][0]
+                    if 'Class' in item:
+                        pointer2 = 0
+                        while item[pointer2] != ':':
                             pointer2 = pointer2 + 1
                         pointer2 = pointer2 + 1
-                        if val_num == '':
-                            equal = False
-                            test_labels.append(float(class_l))
-                        # Equality?
-                        elif data_test[i,feat_num] != float(val_num):
-                            equal = False
-            if len(test_labels) == i:
-                test_labels.append(0)
+                        class_l = ''
+                        while item[pointer2] != '-':
+                            class_l = class_l + str(item[pointer2])
+                            pointer2 = pointer2 + 1
+                        while item[pointer2] != '*':
+                            pointer2 = pointer2 + 1
+                        pointer2 = pointer2 + 1
+                        equal = True
+                        while equal:
+                            # Determine feature
+                            feat_num = ''
+                            pointer1 = 1
+                            while item[pointer1] != ']':
+                                feat_num = feat_num + str(item[pointer1])
+                                pointer1 = pointer1 + 1
+                            feat_num = int(float(feat_num))
+
+                            # Determine value
+                            val_num = ''
+                            while (pointer2 < (len(item))) and (item[pointer2] != '*'):
+                                val_num = val_num + str(item[pointer2])
+                                pointer2 = pointer2 + 1
+                            pointer2 = pointer2 + 1
+                            if val_num == '':
+                                equal = False
+                                test_labels.append(float(class_l))
+                            # Equality?
+                            elif data_test[i,feat_num] != float(val_num):
+                                equal = False
+                if len(test_labels) == i:
+                    test_labels.append(-1)
 
         self.tst_labels = test_labels

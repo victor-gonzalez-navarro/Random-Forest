@@ -14,10 +14,49 @@ def compute_used_features(string):
             feat = ''
     return features
 
+def compute_used_values(string):
+    values = []
+    val = ''
+    enter = 0
+    for letter in string:
+        if enter > 0:
+            if letter != '*':
+                val = val + letter
+            if ((letter == '*') or (enter == (len(string)-1))) and ('Class' not in val):
+                values.append(float(val))
+                val = ''
+        enter = enter + 1
+    return values
+
+def compute_used_values2(string):
+    pointer = 0
+    while string[pointer] != '*':
+        pointer = pointer + 1
+
+    string2 = string[pointer:]
+    values = []
+    val = ''
+    enter = 0
+    for letter in string2:
+        if enter > 0:
+            if letter != '*':
+                val = val + letter
+            if ((letter == '*') or (enter == (len(string2)-1))) and ('Class' not in val):
+                values.append(float(val))
+                val = ''
+        enter = enter + 1
+    return values
+
 def generate_string(vector):
     string = ''
     for itt in vector:
         string = string + '[' + str(itt) + ']'
+    return string
+
+def generate_string_values(vector):
+    string = ''
+    for itt in vector:
+        string = string + '*' + str(itt)
     return string
 
 
@@ -47,7 +86,7 @@ def compute_information(data, labels):
             vall = dat[item][dictkeys]
             if vall != 0:
                 coef = vall/num_firstPart
-                logpart = logpart + (-coef)*math.log2(coef)
+                logpart = logpart + (-coef)*math.log(coef,2)
         information = information + first_part*logpart
     return information
 
@@ -88,23 +127,26 @@ def is_terminal(string, data, labels):
         label = labels
     return isterminal, label
 
-def draw_tree(tree):
-    file = open('./testfile.txt', 'w')
+def draw_tree(tree, b):
+    file = open('./trees/testfile'+str(b)+'.txt', 'w')
     file.write('digraph G {')
     enter = False
     finito = 0
-    for item in tree.keys():
+    for itemm in tree.keys():
+        item = tree[itemm][0]
         if enter:
             if 'Class' not in item:
-                phrase = tree[item][2]
+                phrase = tree[itemm][2]
                 it = len(phrase) - 1
                 label = ''
                 while phrase[it] != '*':
                     label = phrase[it] + label
                     it = it - 1
-                path = compute_used_features(item)
+                path = compute_used_features(itemm)
                 string_new = generate_string(path[:-1])
-                file.write('\n "At: '+str(path[-2])+ "\\n"+'#inst. = '+str(len(tree[string_new][1]))+'" -> ' +'"At: '+str(path[-1]) + "\\n"+'#inst. = '+str(len(tree[item][1]))+'" [label='+label+']')
+                path2 = compute_used_values(tree[itemm][2])
+                string_new2 = generate_string_values(path2[:-1])
+                file.write('\n "At: '+str(path[-2])+ "\\n"+'#inst. = '+str(len(tree[string_new+string_new2][1]))+'" -> ' +'"At: '+str(path[-1]) + "\\n"+'#inst. = '+str(len(tree[itemm][1]))+'" [label='+label+']')
             else:
                 finito = finito + 1
                 it = len(item) - 1
@@ -141,9 +183,11 @@ def draw_tree(tree):
                     new_pint = new_pint + 1
                 ppath = compute_used_features(ppath)
                 string_new = generate_string(ppath)
+                ppath2 = compute_used_values2(item)
+                string_new2 = generate_string_values(ppath2[:-1])
 
                 # Print
-                file.write('\n "At: '+str(path[0])+ "\\n"+'#inst. = '+str(len(tree[string_new][1]))+'" -> ' +'"T'+str(
+                file.write('\n "At: '+str(path[0])+ "\\n"+'#inst. = '+str(len(tree[string_new+string_new2][1]))+'" -> ' +'"T'+str(
                     finito)+': Class '+ str(class_label) + "\\n"+'#inst. = '+str(len(tree[item][1]))+ '" [label='+label+']')
 
         enter = True
