@@ -1,8 +1,10 @@
 import random
+import matplotlib.pyplot as plt
 
 from algorithms.auxiliaryFunctions import *
 from algorithms.ID3Algorithm import *
 from collections import Counter
+
 
 
 class randomForestAlgorithm():
@@ -15,9 +17,9 @@ class randomForestAlgorithm():
         self.NT = NT
         self.F = F
 
-    def fit(self, data, labels):
+    def fit(self, data, labels, dict_Att):
         Ninstances = data.shape[0]
-        # random.seed(30)
+        # random.seed(35)
 
         # For b = 1, ..., NT
         for b in range(self.NT):
@@ -29,8 +31,28 @@ class randomForestAlgorithm():
 
             # 2. Train a classification or regression tree on those examples
             ID3tree = ID3Algorithm(self.F, b)
-            ID3tree.fit(data_b, labels_b)
+            ID3tree.fit(data_b, labels_b, dict_Att)
             self.trees = self.trees + [ID3tree,]
+
+    def plotFeaturesImportance(self, ax, counter):
+        appearance_features = []
+        for b in range(self.NT):
+            appearance_features = appearance_features + self.trees[b].best_features_used
+        d = Counter(appearance_features)
+        deg, cnt = zip(*d.items())
+        print('Starting from zero, the importance of each feture ordered from wort to best (ascending order) is:')
+        order = np.argsort(cnt)
+        print(np.array(deg)[order])
+        cnt = np.true_divide(np.array(cnt), len(appearance_features))
+        ax.bar(deg, cnt, width=len(deg)/(2*len(deg)), color='b')
+        if counter == 3:
+            ax.title.set_text("Importance [NT="+str(self.NT)+', F=(log2(M)+1)]')
+        elif counter == 4:
+            ax.title.set_text("Importance [NT="+str(self.NT)+', F=sqrt(M)]')
+        else:
+            ax.title.set_text("Importance [NT="+str(self.NT)+', F='+str(self.F)+']')
+        ax.set_xlabel("Feature number")
+        ax.set_ylabel("Frequency")
 
     def classify(self, data_test):
         result = np.zeros((self.NT,data_test.shape[0]))

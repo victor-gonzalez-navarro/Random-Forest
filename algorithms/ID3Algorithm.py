@@ -8,18 +8,17 @@ class ID3Algorithm():
 
     tst_labels = None
     tree = None
+    best_features_used = []
 
     def __init__(self, F, b):
         self.F = F
         self.b = b
 
-    def fit(self, data, labels):
-        # random.seed(15)
+    def fit(self, data, labels, dict_Att):
+        # random.seed(30)
 
         tree = dict()  # Tree as a dictionary of dictionaries (dicitionaries is a list of used nodes and indices)
         last_added = []  # Last added nodes
-
-        # Hacer dos bucles, uno por niveles (vertical) y otro por horizontal. Usar last_added
 
         # FIRST NODE -----------------------------------------------------------------------
         # Compute features random for the particular node
@@ -36,6 +35,7 @@ class ID3Algorithm():
             information.append(compute_information(data[:,feature_number], labels))
         best_indx = information.index(min(information))
         best_attr = vec_random[best_indx]
+        self.best_features_used.append(best_attr)
         keyy = '['+str(best_attr)+']'
         dictionary = [keyy,[it for it in range(data.shape[0])],'']
         tree[dictionary[0]+dictionary[2]] = dictionary  # dictionary is a list with: the attributes seen, the instances that are included, and the value o the attributes (i.e., useful for the tree)
@@ -48,7 +48,7 @@ class ID3Algorithm():
             for last_add in last_added:
 
                 # Divide leaf with its children
-                att_values, att = number_differentvalues_att(last_add, data)
+                att_values, att = number_differentvalues_attr(last_add, dict_Att)
                 Natt_value = len(att_values)
                 dict_inst_satis = instances_satisfying_attvalue(data[last_add[1],att], last_add[1])
 
@@ -56,8 +56,18 @@ class ID3Algorithm():
                 for i in range(Natt_value):
 
                     # Find if the new node is terminal or not
-                    indices = dict_inst_satis[att_values[i]]
-                    bol_terminal, lab_class = is_terminal(last_add[0], data[indices,:], labels[indices])
+                    if att_values[i] in dict_inst_satis:
+                        special = 0
+                        indices = dict_inst_satis[att_values[i]]
+                        bol_terminal, lab_class = is_terminal(last_add[0], data[indices,:], labels[indices])
+                    else:
+                        # There are no instances in this leaf that satisfy the specific attribute value
+                        bol_terminal = True
+                        special = 1
+                        lab_class = []
+                        for key, value in dict_inst_satis.items():
+                            lab_class = lab_class + list(labels[value])
+                        lab_class = np.array(lab_class)
                     if bol_terminal == False:
                         # Compute features random for the particular node (that have not been used and that are differ.)
                         vec_random = []
@@ -76,6 +86,7 @@ class ID3Algorithm():
                                                                                  labels[indices]),]
                         best_indx = information.index(min(information))
                         best_attr = vec_random[best_indx]
+                        self.best_features_used.append(best_attr)
                         keyy = '[' + str(best_attr) + ']'
                         dictionary = [last_add[0]+keyy, indices, tree[last_add[0]+last_add[2]][2]+'*'+str(att_values[i])]
 
@@ -92,9 +103,12 @@ class ID3Algorithm():
                         else:
                             str_lab_class = str(lab_class)
 
-
-                        dictionary = [last_add[0]+'--Class:'+str_lab_class+'--Seq:'+sequence, dict_inst_satis[
+                        if special == 0:
+                            dictionary = [last_add[0]+'--Class:'+str_lab_class+'--Seq:'+sequence, dict_inst_satis[
                             att_values[i]], sequence]
+                        else:
+                            dictionary = [last_add[0]+'--Class:'+str_lab_class+'--Seq:'+sequence, [], sequence]
+
                         tree[dictionary[0]] = dictionary
 
 
@@ -116,21 +130,23 @@ class ID3Algorithm():
                             pointer2 = pointer2 + 1
                         pointer2 = pointer2 + 1
                         class_l = ''
-                        while item[pointer2] != '-':
+                        while item[pointer2]!='-' and item[pointer2]!=' ':
                             class_l = class_l + str(item[pointer2])
                             pointer2 = pointer2 + 1
                         while item[pointer2] != '*':
                             pointer2 = pointer2 + 1
                         pointer2 = pointer2 + 1
                         equal = True
+                        pointer1 = 1
                         while equal:
                             # Determine feature
                             feat_num = ''
-                            pointer1 = 1
-                            while item[pointer1] != ']':
-                                feat_num = feat_num + str(item[pointer1])
-                                pointer1 = pointer1 + 1
-                            feat_num = int(float(feat_num))
+                            if item[pointer1]!='-':
+                                while item[pointer1] != ']':
+                                    feat_num = feat_num + str(item[pointer1])
+                                    pointer1 = pointer1 + 1
+                                feat_num = int(float(feat_num))
+                                pointer1 = pointer1 + 2
 
                             # Determine value
                             val_num = ''

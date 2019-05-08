@@ -91,14 +91,14 @@ def compute_information(data, labels):
     return information
 
 
-def number_differentvalues_att(last_add, data):
+def number_differentvalues_attr(last_add, dict_Att):
     string = last_add[0]
     it = len(string)-2
     feature = ''
     while string[it] != '[':
         feature = string[it] + feature
         it = it - 1
-    result = list(set(data[last_add[1],int(feature)]))
+    result = dict_Att[int(feature)]
     return result, int(feature)
 
 
